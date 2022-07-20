@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <title>Calculadora de Taxas</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+        <style>
+        body {
+            background-color: #eee;
+        }
+        .calculadora {
+            background-color: #fff;
+            width: 550px;
+            margin: 65px auto;
+            padding: 20px 25px;
+            border-radius: 5px;
+            box-shadow: 0px 2px 10px rgb(0 0 0 / 8%);
+        }
+        </style>
+    </head>
+    <body>
+        <div class="calculadora">
+            <form>
+                <div class="row">
+                    <div class="col">
+                        <label>Valor da compra</label>
+                        <input placeholder="R$ 0,00" id="val_compra" type="text" class="form-control item" maxlength="9" onKeyUp="formatarMoeda(this)">
+                    </div>
+                    <div class="col">
+                        <label>Entrada em dinheiro (Opcional)</label>
+                        <input placeholder="R$ 0,00" id="val_entrada" type="text" class="form-control item" maxlength="9" onKeyUp="formatarMoeda(this)">
+                    </div>
+                </div>
+            </form>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>PARCELAS</th>
+                        <th>VALOR PARCELAS</th>
+                        <th>VALOR TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody id="exibir"></tbody>
+            </table>
+        </div>
+        <!-- Footer -->
+        <footer>
+            <!-- Copyright -->
+            <div class="text-center py-3"> Copyright &copy; Calculadora de Taxas - <a href="https://github.com/EduardoHFBezerra" target="_blank">Eduardo Bezerra</a>
+            </div>
+            <!-- Copyright -->
+        </footer>
+        <!-- Footer -->
+        <script>
+            function calculo(val1, val2) {
+                valor_compra = parseInt(val1);
+                valor_entrada = val2;
+                var taxas = [2.25, 5.00, 5.79, 6.61, 7.40, 8.23, 9.04, 9.87, 10.69, 11.51, 12.35, 13.58];  // Taxas de 1 até 12x
+                let taxa_debito = 1.5; // Taxa no débito
+                var valor_parcelas = [];
+                var valor_total = [];
+                var valor = valor_compra - valor_entrada;
+                // Parte da taxa de débito
+                let percentual_debito = (taxa_debito * valor) / 100;
+                let debito_total = valor + percentual_debito;
+                var i = 0;
+                while (taxas[i]) {
+                    let percentual = (taxas[i] * valor) / 100
+                    valor_total.push(valor + percentual); // Populando os valores totais
+                    valor_parcelas.push((valor + percentual) / (i + 1)); // Populando os valores das parcelas
+                    i++;
+                }
+                var table = "";
+                for (var i in valor_parcelas) {
+                    table += "<tr>" + "<td>" + (parseInt(i) + 1) + " x " + "</td>" + "<td>" + valor_parcelas[i].toLocaleString('pt-br', {style: 'currency', currency: 'BRL'}) + "</td>" + "<td>" + 
+                    valor_total[i].toLocaleString('pt-br', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }) + "</td></tr>";
+                }
+                debito_linha = "<tr>" + "<td>" + "Débito " + "</td>" + "<td>" + debito_total.toLocaleString('pt-br', {style: 'currency', currency: 'BRL'}) + "</td>" + "<td> " + 
+                debito_total.toLocaleString('pt-br', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }) + "</td></tr>";
+                document.getElementById("exibir").innerHTML = debito_linha + table;
+            }
+
+            function formatarMoeda(e) {
+                var elemento = e;
+                var valor = elemento.value;
+                valor = valor + '';
+                valor = parseInt(valor.replace(/[\D]+/g, ''));
+                valor = valor + '';
+                valor = valor.replace(/([0-9]{2})$/g, ",$1");
+                if (valor.length > 6) {
+                    valor = valor.replace(/([0-9]{3}),([0-9]{2}$)/g, ".$1,$2");
+                }
+                elemento.value = valor;
+                if (valor == 'NaN') elemento.value = '';
+            }
+
+            function moedaParaFloat(valor) {
+                if (valor === '') {
+                    valor = 0;
+                } else {
+                    valor = valor.replace('.', '');
+                    valor = valor.replace(',', '.');
+                    valor = parseFloat(valor);
+                }
+                return valor;
+            }
+            var text = document.getElementById("val_compra");
+            var entrada = document.getElementById("val_entrada");
+            text.addEventListener("keyup", function() {
+                var val_compra = moedaParaFloat(this.value);
+                var val_entrada = moedaParaFloat(document.getElementById("val_entrada").innerHTML);
+                calculo(val_compra, val_entrada);
+            })
+            entrada.addEventListener("keyup", function() {
+                var val_compra = moedaParaFloat(text.value);
+                val_entrada = moedaParaFloat(this.value);
+                calculo(val_compra, val_entrada);
+            });
+        </script>
+    </body>
+</html>
